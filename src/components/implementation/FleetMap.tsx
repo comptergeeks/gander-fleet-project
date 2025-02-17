@@ -4,17 +4,16 @@ import { WorldMap } from "@/components/ui/world-map";
 import { motion } from "motion/react";
 
 /*
-data needs to be fed into this component
+pretty sure i can update this component to hover and show model names once data is polled in
 
+green dots --> completed
+
+red dots --> in air
 */
 
 export function FleetMap() {
   return (
     <div className="dark:bg-black bg-white w-full">
-      <div className="">
-        <p> current flights </p>
-      </div>
-
       <WorldMap
         dots={[
           {
