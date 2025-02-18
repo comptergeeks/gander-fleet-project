@@ -45,8 +45,10 @@ async function fetchMapData(): Promise<any> {
 }
 
 export default async function Home() {
-  const aircraftData = await fetchAircraftData();
-  const mapData = await fetchMapData();
+  const [aircraftData, mapData] = await Promise.all([
+    fetchAircraftData(),
+    fetchMapData(),
+  ]);
 
   return (
     <div className="min-h-screen bg-black">

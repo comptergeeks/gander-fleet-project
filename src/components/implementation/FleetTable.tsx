@@ -1,4 +1,6 @@
 // FleetTable.tsx
+// im pretty sure i should move data fetching here, that way only the component refetches
+// i'd use a use effect with use state, but would
 import {
   Table,
   TableBody,

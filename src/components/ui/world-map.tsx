@@ -1,21 +1,33 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import DottedMap from "dotted-map";
 import Image from "next/image";
-import { useTheme } from "next-themes";
 
 interface MapProps {
   dots?: Array<{
     start: { lat: number; lng: number; label?: string };
     end: { lat: number; lng: number; label?: string };
+    details: {
+      model: string;
+      plane_id: string;
+      tail_number: string;
+      location?: string;
+      origin?: string;
+      destination?: string;
+    };
   }>;
   lineColor?: string;
 }
 
 export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<{
+    x: number;
+    y: number;
+    content: React.ReactNode;
+  } | null>(null);
   const map = new DottedMap({ height: 100, grid: "diagonal" });
   const theme = "dark";
 
@@ -48,6 +60,37 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
     );
   };
 
+  const handleMouseEnter = (
+    point: { x: number; y: number },
+    dot: MapProps["dots"][0],
+    moving: boolean,
+  ) => {
+    const rect = svgRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    const x = (point.x / 800) * rect.width;
+    const y = (point.y / 400) * rect.height;
+
+    const content = (
+      <div className="bg-black/80 text-white p-2 rounded-lg shadow-lg text-sm">
+        <div className="font-semibold">{dot.details.model}</div>
+        <div>ID: {dot.details.plane_id}</div>
+        <div>Tail: {dot.details.tail_number}</div>
+        {moving ? (
+          <div className="text-gray-300">
+            {dot.details.origin} → {dot.details.destination}
+          </div>
+        ) : (
+          <div className="text-gray-300">
+            Location: {dot.details.location || "Unknown"}
+          </div>
+        )}
+      </div>
+    );
+
+    setHoveredPoint({ x, y, content });
+  };
+
   return (
     <div className="w-full aspect-[2/1] dark:bg-black bg-white rounded-lg relative font-sans">
       <Image
@@ -61,13 +104,13 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
       <svg
         ref={svgRef}
         viewBox="0 0 800 400"
-        className="w-full h-full absolute inset-0 pointer-events-none select-none"
+        className="w-full h-full absolute inset-0"
       >
         {dots.map((dot, i) => {
           const startPoint = projectPoint(dot.start.lat, dot.start.lng);
           const endPoint = projectPoint(dot.end.lat, dot.end.lng);
           const moving = isMoving(dot);
-          const dotColor = moving ? "#ef4444" : "#22c55e"; // Red for moving, green for stationary
+          const dotColor = moving ? "#ef4444" : "#22c55e";
 
           return (
             <g key={`path-group-${i}`}>
@@ -77,12 +120,8 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                   fill="none"
                   stroke={dotColor}
                   strokeWidth="1"
-                  initial={{
-                    pathLength: 0,
-                  }}
-                  animate={{
-                    pathLength: 1,
-                  }}
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
                   transition={{
                     duration: 1,
                     delay: 0.5 * i,
@@ -90,7 +129,11 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                   }}
                 />
               )}
-              <g key={`start-${i}`}>
+              <g
+                onMouseEnter={() => handleMouseEnter(startPoint, dot, moving)}
+                onMouseLeave={() => setHoveredPoint(null)}
+                style={{ cursor: "pointer" }}
+              >
                 <circle
                   cx={startPoint.x}
                   cy={startPoint.y}
@@ -121,9 +164,19 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                     repeatCount="indefinite"
                   />
                 </circle>
+                <circle
+                  cx={startPoint.x}
+                  cy={startPoint.y}
+                  r="10"
+                  fill="transparent"
+                />
               </g>
               {moving && (
-                <g key={`end-${i}`}>
+                <g
+                  onMouseEnter={() => handleMouseEnter(endPoint, dot, moving)}
+                  onMouseLeave={() => setHoveredPoint(null)}
+                  style={{ cursor: "pointer" }}
+                >
                   <circle
                     cx={endPoint.x}
                     cy={endPoint.y}
@@ -154,12 +207,29 @@ export function WorldMap({ dots = [], lineColor = "#0ea5e9" }: MapProps) {
                       repeatCount="indefinite"
                     />
                   </circle>
+                  <circle
+                    cx={endPoint.x}
+                    cy={endPoint.y}
+                    r="10"
+                    fill="transparent"
+                  />
                 </g>
               )}
             </g>
           );
         })}
       </svg>
+      {hoveredPoint && (
+        <div
+          className="absolute pointer-events-none z-50"
+          style={{
+            left: hoveredPoint.x + 10,
+            top: hoveredPoint.y - 10,
+          }}
+        >
+          {hoveredPoint.content}
+        </div>
+      )}
     </div>
   );
 }

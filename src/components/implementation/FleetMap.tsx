@@ -17,6 +17,8 @@ interface MapData {
     origin_long: string;
     dest_lat: string;
     dest_long: string;
+    origin: string;
+    destination: string;
   }[];
 }
 
@@ -25,7 +27,7 @@ interface FleetMapProps {
 }
 
 export function FleetMap({ mapData }: FleetMapProps) {
-  // Transform the API data - fixing the lat/lng swap
+  console.log(JSON.stringify(mapData));
   const apiDots = [
     // Add in-air aircraft with their routes
     ...(mapData.in_air?.map((aircraft) => ({
@@ -39,23 +41,34 @@ export function FleetMap({ mapData }: FleetMapProps) {
         lng: parseFloat(aircraft.dest_long),
         label: `${aircraft.model} (${aircraft.tail_number})`,
       },
+      details: {
+        model: aircraft.model,
+        plane_id: aircraft.plane_id,
+        tail_number: aircraft.tail_number,
+        origin: aircraft.origin,
+        destination: aircraft.destination,
+      },
     })) || []),
     // Add available aircraft as points
     ...(mapData.available?.map((aircraft) => ({
       start: {
         lat: parseFloat(aircraft.locaton_long),
-        lng: parseFloat(aircraft.location_lat), // Note: typo in API field name
+        lng: parseFloat(aircraft.location_lat),
         label: `${aircraft.model} (${aircraft.tail_number})`,
       },
       end: {
         lat: parseFloat(aircraft.locaton_long),
-        lng: parseFloat(aircraft.location_lat), // Note: typo in API field name
+        lng: parseFloat(aircraft.location_lat),
         label: `${aircraft.model} (${aircraft.tail_number})`,
+      },
+      details: {
+        model: aircraft.model,
+        plane_id: aircraft.plane_id,
+        tail_number: aircraft.tail_number,
+        location: "placeholder", // Placeholder until API returns location
       },
     })) || []),
   ];
-
-  // Dummy data for testing
 
   return (
     <div className="dark:bg-black bg-white w-full">

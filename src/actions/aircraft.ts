@@ -29,9 +29,9 @@ export async function addAircraft(
     },
   ); // posts aircraft api end point
   console.log("Server action called with:", aircraft);
+  revalidatePath("/");
 
   if (response.ok) {
-    revalidatePath("/");
     return {
       success: true,
       message: "Aircraft added successfully",
