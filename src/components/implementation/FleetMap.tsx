@@ -1,53 +1,65 @@
 "use client";
-
 import { WorldMap } from "@/components/ui/world-map";
-import { motion } from "motion/react";
 
-/*
-pretty sure i can update this component to hover and show model names once data is polled in
+interface MapData {
+  available: {
+    plane_id: string;
+    model: string;
+    tail_number: string;
+    location_lat: string;
+    locaton_long: string;
+  }[];
+  in_air: {
+    plane_id: string;
+    model: string;
+    tail_number: string;
+    origin_lat: string;
+    origin_long: string;
+    dest_lat: string;
+    dest_long: string;
+  }[];
+}
 
-green dots --> completed
+interface FleetMapProps {
+  mapData: MapData;
+}
 
-red dots --> in air
-*/
+export function FleetMap({ mapData }: FleetMapProps) {
+  // Transform the API data - fixing the lat/lng swap
+  const apiDots = [
+    // Add in-air aircraft with their routes
+    ...(mapData.in_air?.map((aircraft) => ({
+      start: {
+        lat: parseFloat(aircraft.origin_lat),
+        lng: parseFloat(aircraft.origin_long),
+        label: `${aircraft.model} (${aircraft.tail_number})`,
+      },
+      end: {
+        lat: parseFloat(aircraft.dest_lat),
+        lng: parseFloat(aircraft.dest_long),
+        label: `${aircraft.model} (${aircraft.tail_number})`,
+      },
+    })) || []),
+    // Add available aircraft as points
+    ...(mapData.available?.map((aircraft) => ({
+      start: {
+        lat: parseFloat(aircraft.locaton_long),
+        lng: parseFloat(aircraft.location_lat), // Note: typo in API field name
+        label: `${aircraft.model} (${aircraft.tail_number})`,
+      },
+      end: {
+        lat: parseFloat(aircraft.locaton_long),
+        lng: parseFloat(aircraft.location_lat), // Note: typo in API field name
+        label: `${aircraft.model} (${aircraft.tail_number})`,
+      },
+    })) || []),
+  ];
 
-export function FleetMap() {
+  // Dummy data for testing
+
   return (
     <div className="dark:bg-black bg-white w-full">
-      <WorldMap
-        dots={[
-          {
-            start: {
-              lat: 64.2008,
-              lng: -149.4937,
-            }, // Alaska (Fairbanks)
-            end: {
-              lat: 34.0522,
-              lng: -118.2437,
-            }, // Los Angeles
-          },
-          {
-            start: { lat: 64.2008, lng: -149.4937 }, // Alaska (Fairbanks)
-            end: { lat: -15.7975, lng: -47.8919 }, // Brazil (Brasília)
-          },
-          {
-            start: { lat: -15.7975, lng: -47.8919 }, // Brazil (Brasília)
-            end: { lat: 38.7223, lng: -9.1393 }, // Lisbon
-          },
-          {
-            start: { lat: 51.5074, lng: -0.1278 }, // London
-            end: { lat: 28.6139, lng: 77.209 }, // New Delhi
-          },
-          {
-            start: { lat: 28.6139, lng: 77.209 }, // New Delhi
-            end: { lat: 43.1332, lng: 131.9113 }, // Vladivostok
-          },
-          {
-            start: { lat: 28.6139, lng: 77.209 }, // New Delhi
-            end: { lat: -1.2921, lng: 36.8219 }, // Nairobi
-          },
-        ]}
-      />
+      <WorldMap dots={apiDots} lineColor="#0ea5e9" />
     </div>
   );
 }
