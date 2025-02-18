@@ -15,8 +15,7 @@ todo:
 - then create AI booking assistant using OpenAI API with function calls
 */
 // request data here and pass as params to table
-
-// can probably export this to a different component
+// create to add to the map!
 async function fetchAircraftData(): Promise<Aircraft[]> {
   // const API_KEY = process.env.AIRCRAFT_API_KEY; // Add your API key to .env.local
   // make sure to add env local

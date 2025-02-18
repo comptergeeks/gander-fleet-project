@@ -16,11 +16,14 @@ import { useState } from "react";
 import { addAircraft } from "../../actions/aircraft";
 import { Aircraft } from "@/app/types";
 
-type AircraftStatus = "active" | "maintenance" | "grounded";
+type AircraftStatus = "maintenance" | "available" | "in_air"; // this will allow us to create the different plane
 
 // omit statss, id, location, and current trip status, all this will be set later
 // server will send post request
-type NewAircraftFormData = Omit<Aircraft, "plane_id">;
+type NewAircraftFormData = Omit<
+  Aircraft,
+  "status" | "plane_id" | "current_trip_status" | "maintenance_due_date"
+>;
 
 export function AddAircraftDialog() {
   const [newAircraft, setNewAircraft] = useState<Partial<NewAircraftFormData>>(
@@ -41,14 +44,9 @@ export function AddAircraftDialog() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setOpen(false);
       // Ensure all required fields are filled
-      if (
-        !newAircraft.model ||
-        !newAircraft.tail_number ||
-        !newAircraft.status ||
-        !newAircraft.location ||
-        !newAircraft.maintenance_due_date
-      ) {
+      if (!newAircraft.model || !newAircraft.tail_number) {
         throw new Error("Please fill in all required fields");
       }
 
@@ -110,9 +108,23 @@ export function AddAircraftDialog() {
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">
-                Status
+              <Label htmlFor="capacity" className="text-right">
+                Capacity
               </Label>
+              <Input
+                id="capacity"
+                placeholder="16"
+                className="col-span-3"
+                value={newAircraft.capacity?.toString() || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // test for numeric value
+                  if (value === "" || /^\d+$/.test(value)) {
+                    handleInputChange("capacity", value);
+                  }
+                }}
+                required
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="location" className="text-right">
@@ -124,21 +136,6 @@ export function AddAircraftDialog() {
                 className="col-span-3"
                 value={newAircraft.location || ""}
                 onChange={(e) => handleInputChange("location", e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="maintenance_due" className="text-right">
-                Maintenance Due
-              </Label>
-              <Input
-                id="maintenance_due"
-                type="date"
-                className="col-span-3"
-                value={newAircraft.maintenance_due_date || ""}
-                onChange={(e) =>
-                  handleInputChange("maintenance_due_date", e.target.value)
-                }
                 required
               />
             </div>
