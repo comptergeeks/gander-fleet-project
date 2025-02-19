@@ -17,7 +17,9 @@ export const BentoGrid = ({
 };
 
 /*
-cool implementation for later --> add moving highlighted borders when hovering, this would be sick
+
+cool implementation for later -->
+add moving highlighted borders when hovering, this would be sick
 
 */
 export const BentoGridItem = ({
