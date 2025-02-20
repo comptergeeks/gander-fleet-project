@@ -1,4 +1,3 @@
-"use client";
 import { WorldMap } from "@/components/ui/world-map";
 
 interface MapData {
