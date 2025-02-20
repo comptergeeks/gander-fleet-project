@@ -3,13 +3,14 @@ import { FleetTable } from "@/components/implementation/FleetTable";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { Aircraft } from "./types";
 
+const key: string = process.env.AWS_KEY || "";
 // MOVE ALL API KEYS TO .env -- this is just for the prototype
 async function fetchAircraftData(): Promise<Aircraft[]> {
   const response = await fetch(
     "https://ap5sqkwlfk.execute-api.us-west-2.amazonaws.com/default/aircraft-function/table",
     {
       headers: {
-        "x-api-key": "DUG80cCw8waYG0njpaEEH2AyEip7PalN4T1uNitk",
+        "x-api-key": key,
       },
     },
   );
@@ -30,7 +31,7 @@ async function fetchMapData(): Promise<any> {
     "https://ap5sqkwlfk.execute-api.us-west-2.amazonaws.com/default/aircraft-function/map",
     {
       headers: {
-        "x-api-key": "DUG80cCw8waYG0njpaEEH2AyEip7PalN4T1uNitk",
+        "x-api-key": key,
       },
     },
   );
