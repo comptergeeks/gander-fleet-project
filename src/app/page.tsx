@@ -3,6 +3,7 @@ import { FleetTable } from "@/components/implementation/FleetTable";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import { Aircraft } from "./types";
 
+// MOVE ALL API KEYS TO .env -- this is just for the prototype
 async function fetchAircraftData(): Promise<Aircraft[]> {
   const response = await fetch(
     "https://ap5sqkwlfk.execute-api.us-west-2.amazonaws.com/default/aircraft-function/table",
